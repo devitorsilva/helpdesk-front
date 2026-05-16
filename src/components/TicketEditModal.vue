@@ -10,6 +10,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void
+  (e: 'save'): void
 }>()
 
 const form = ref({
@@ -25,6 +26,7 @@ watch(
   (ticket) => {
     form.value = {
       title: ticket.title,
+      description: ticket.description,
       status: ticket.status,
       priority: ticket.priority,
       assignedTo: ticket.assignedTo ?? '',
@@ -63,6 +65,21 @@ watch(
             class="w-full rounded border border-gray-300 px-3 py-2 text-sm"
           />
         </div>
+        <div>
+          <label
+            for="description"
+            class="mb-1 block text-sm font-medium text-gray-700"
+          >
+            Descrição
+          </label>
+          <textarea
+            id="description"
+            v-model="form.description"
+            type="textarea"
+            rows="2"
+            class="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+          />
+        </div>
 
         <StatusSelect v-model="form.status"></StatusSelect>
 
@@ -95,6 +112,7 @@ watch(
         <button
           type="button"
           class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+          @click="emit('save', form)"
         >
           Salvar
         </button>

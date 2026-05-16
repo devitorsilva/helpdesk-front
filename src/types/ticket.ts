@@ -1,24 +1,32 @@
-export type TicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'
 
-export type TicketPriority = "LOW" | "MEDIUM" | "HIGH";
+export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH'
 
 export type Ticket = {
-  id: number;
-  title: string;
-  description: string;
-  status: TicketStatus;
-  priority: TicketPriority;
-  requesterName: string;
-  requesterEmail: string;
-  assignedTo: string | null;
-  createdAt: string;
-  updatedAt: string | null;
-};
+  id: number
+  title: string
+  description: string
+  status: TicketStatus
+  priority: TicketPriority
+  requesterName: string
+  requesterEmail: string
+  assignedTo: string | null
+  createdAt: string
+  updatedAt: string | null
+}
 
 export type TicketPage = {
-  content: Ticket[];
-  totalPages: number;
-  totalElementes: number;
-  size: number;
-  number: number;
-};
+  content: Ticket[]
+  totalPages: number
+  totalElementes: number
+  size: number
+  number: number
+}
+
+export type UpdateTicketRequest = {
+  title?: string
+  description?: string
+  status?: TicketStatus
+  priority?: TicketPriority
+  assignedTo?: string | null
+}

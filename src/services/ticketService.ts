@@ -1,4 +1,10 @@
-import type { TicketPage, TicketPriority, TicketStatus } from '../types/ticket'
+import type {
+  Ticket,
+  TicketPage,
+  TicketPriority,
+  TicketStatus,
+  UpdateTicketRequest,
+} from '../types/ticket'
 import { api } from './api.ts'
 
 export async function getTickets(
@@ -15,5 +21,13 @@ export async function getTickets(
       size: size,
     },
   })
+  return response.data
+}
+
+export async function updateTicket(
+  id: number,
+  request: UpdateTicketRequest
+): Promise<Ticket> {
+  const response = await api.patch<Ticket>(`/tickets/${id}`, request)
   return response.data
 }

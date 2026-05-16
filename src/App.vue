@@ -4,12 +4,13 @@ import PrioritySelect from './components/PrioritySelect.vue'
 import StatusSelect from './components/StatusSelect.vue'
 import TicketEditModal from './components/TicketEditModal.vue'
 import TicketTable from './components/TicketTable.vue'
-import { getTickets } from './services/ticketService'
+import { getTickets, updateTicket } from './services/ticketService'
 import type {
   Ticket,
   TicketPage,
   TicketPriority,
   TicketStatus,
+  UpdateTicketRequest,
 } from './types/ticket'
 
 const ticketsPage = ref<TicketPage | null>(null)
@@ -53,6 +54,14 @@ function handleEditTicket(ticket: Ticket) {
 function handleCloseModal() {
   selectedTicket.value = null
 }
+
+async function handleUpdateTicket(request: UpdateTicketRequest) {
+  if (!selectedTicket.value) return
+
+  await updateTicket(selectedTicket.value.id, request)
+  selectedTicket.value = null
+  await loadTickets()
+}
 </script>
 
 <template>
@@ -91,6 +100,7 @@ function handleCloseModal() {
       v-if="selectedTicket"
       :ticket="selectedTicket"
       @close="handleCloseModal"
+      @save="handleUpdateTicket"
     />
   </main>
 </template>
