@@ -1,5 +1,44 @@
-# Vue 3 + TypeScript + Vite
+# Helpdesk Frontend
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Frontend do projeto de helpdesk construído com Vue 3 e TypeScript, consumindo a API Spring Boot.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Stack
+
+- Vue 3
+- TypeScript
+- Vite
+- Axios
+- Tailwind CSS
+
+## Funcionalidades
+
+- Listagem de tickets
+- Filtro por status
+- Filtro por prioridade
+- Paginação
+- Edição de ticket em modal
+- Integração com API REST
+
+## Como rodar
+
+```bash
+npm install
+npm run dev
+```
+
+Aplicação disponível em:
+
+- `http://localhost:5173`
+
+## Integração
+
+O frontend espera a API rodando em:
+
+- `http://localhost:8080`
+
+## Fluxos implementados
+
+- Carregar tickets ao abrir a página
+- Filtrar tickets por status e prioridade
+- Navegar entre páginas
+- Editar ticket e atualizar a listagem
