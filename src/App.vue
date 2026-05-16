@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import TicketTable from './components/TicketTable.vue'
 import { getTickets } from './services/ticketService'
 import type { TicketPage } from './types/ticket'
 
@@ -15,12 +16,6 @@ onMounted(async () => {
     <h1>Helpdesk</h1>
     <h3>Gestão de Tickets</h3>
 
-    <p v-if="ticketsPage">Total de tickets: {{ ticketsPage.totalElements }}</p>
-
-    <ul v-if="ticketsPage">
-      <li v-for="ticket in ticketsPage.content" :key="ticket.id">
-        {{ ticket.title }}
-      </li>
-    </ul>
+    <TicketTable v-if="ticketsPage" :tickets="ticketsPage.content" />
   </main>
 </template>
