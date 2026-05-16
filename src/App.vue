@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
+import PrioritySelect from './components/PrioritySelect.vue'
+import StatusSelect from './components/StatusSelect.vue'
+import TicketEditModal from './components/TicketEditModal.vue'
 import TicketTable from './components/TicketTable.vue'
 import { getTickets } from './services/ticketService'
-import type { TicketPage, TicketPriority, TicketStatus } from './types/ticket'
-import { ticketPriorityLabels, ticketStatusLabels } from './utils/ticketLabels'
+import type {
+  Ticket,
+  TicketPage,
+  TicketPriority,
+  TicketStatus,
+} from './types/ticket'
 
 const ticketsPage = ref<TicketPage | null>(null)
 const currentPage = ref(0)
 const selectedStatus = ref<TicketStatus | ''>('')
 const selectedPriority = ref<TicketPriority | ''>('')
+const selectedTicket = ref<Ticket | null>(null)
 
 async function loadTickets() {
   ticketsPage.value = await getTickets(
@@ -37,6 +45,14 @@ function handleNextPage() {
   currentPage.value++
   loadTickets()
 }
+
+function handleEditTicket(ticket: Ticket) {
+  selectedTicket.value = ticket
+}
+
+function handleCloseModal() {
+  selectedTicket.value = null
+}
 </script>
 
 <template>
@@ -49,61 +65,16 @@ function handleNextPage() {
 
       <div class="mb-6 rounded border border-gray-200 bg-white p-4">
         <div class="grid gap-4 md:grid-cols-2">
-          <div>
-            <label
-              for="status"
-              class="mb-1 block text-sm font-medium text-gray-700"
-            >
-              Estado
-            </label>
-            <select
-              id="status"
-              v-model="selectedStatus"
-              class="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-            >
-              <option value="">Todos os estados</option>
-              <option value="OPEN">{{ ticketStatusLabels.OPEN }}</option>
-              <option value="IN_PROGRESS">
-                {{ ticketStatusLabels.IN_PROGRESS }}
-              </option>
-              <option value="RESOLVED">
-                {{ ticketStatusLabels.RESOLVED }}
-              </option>
-              <option value="CLOSED">{{ ticketStatusLabels.CLOSED }}</option>
-            </select>
-          </div>
-
-          <div>
-            <label
-              for="priority"
-              class="mb-1 block text-sm font-medium text-gray-700"
-            >
-              Prioridade
-            </label>
-            <select
-              id="priority"
-              v-model="selectedPriority"
-              class="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-            >
-              <option value="">Todas as prioridades</option>
-              <option value="LOW">{{ ticketPriorityLabels.LOW }}</option>
-              <option value="MEDIUM">{{ ticketPriorityLabels.MEDIUM }}</option>
-              <option value="HIGH">{{ ticketPriorityLabels.HIGH }}</option>
-            </select>
-          </div>
+          <StatusSelect v-model="selectedStatus"></StatusSelect>
+          <PrioritySelect v-model="selectedPriority"></PrioritySelect>
         </div>
-      </div>
-
-      <div class="mb-4">
-        <p v-if="ticketsPage" class="text-sm text-gray-600">
-          {{ ticketsPage.totalElements }} registro(s) encontrado(s)
-        </p>
       </div>
 
       <TicketTable
         v-if="ticketsPage && ticketsPage.content.length > 0"
         @next-page="handleNextPage"
         @previous-page="handlePreviousPage"
+        @edit-ticket="handleEditTicket"
         :tickets="ticketsPage.content"
         :current-page="currentPage"
         :total-pages="ticketsPage.totalPages"
@@ -116,5 +87,10 @@ function handleNextPage() {
         Não existem registros para serem exibidos.
       </div>
     </div>
+    <TicketEditModal
+      v-if="selectedTicket"
+      :ticket="selectedTicket"
+      @close="handleCloseModal"
+    />
   </main>
 </template>

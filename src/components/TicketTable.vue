@@ -60,6 +60,7 @@ const emit = defineEmits<{
             <div class="flex gap-2">
               <button
                 class="cursor-pointer rounded border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-100"
+                @click="emit('edit-ticket', ticket)"
               >
                 Editar
               </button>
