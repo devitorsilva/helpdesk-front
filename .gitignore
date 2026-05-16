@@ -6,6 +6,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+.vscode/
+.prettierrc
 
 # Dependencies and build output
 node_modules/

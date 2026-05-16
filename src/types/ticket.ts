@@ -14,3 +14,11 @@ export type Ticket = {
   createdAt: string;
   updatedAt: string | null;
 };
+
+export type TicketPage = {
+  content: Ticket[];
+  totalPages: number;
+  totalElementes: number;
+  size: number;
+  number: number;
+};
