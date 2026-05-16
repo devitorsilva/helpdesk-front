@@ -3,12 +3,16 @@ import { api } from './api.ts'
 
 export async function getTickets(
   status?: TicketStatus | '',
-  priority?: TicketPriority | ''
+  priority?: TicketPriority | '',
+  page: number = 0,
+  size: number = 10
 ): Promise<TicketPage> {
   const response = await api.get<TicketPage>('/tickets', {
     params: {
       status: status || undefined,
       priority: priority || undefined,
+      page: page,
+      size: size,
     },
   })
   return response.data

@@ -2,8 +2,19 @@
 import type { Ticket } from '../types/ticket'
 import { ticketPriorityLabels, ticketStatusLabels } from '../utils/ticketLabels'
 
+async function previousPage() {}
+
+async function nextPage() {}
+
 defineProps<{
   tickets: Ticket[]
+  currentPage: number
+  totalPages: number
+}>()
+
+const emit = defineEmits<{
+  (e: 'previous-page'): void
+  (e: 'next-page'): void
 }>()
 </script>
 
@@ -62,5 +73,27 @@ defineProps<{
         </tr>
       </tbody>
     </table>
+
+    <div class="mt-4 flex items-center justify-end gap-3">
+      <button
+        class="cursor-pointer rounded border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+        :disabled="currentPage === 0"
+        @click="emit('previous-page')"
+      >
+        Anterior
+      </button>
+
+      <p class="text-sm text-gray-600">
+        Página {{ currentPage + 1 }} de {{ totalPages }}
+      </p>
+
+      <button
+        class="cursor-pointer rounded border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+        :disabled="currentPage + 1 >= totalPages"
+        @click="emit('next-page')"
+      >
+        Próxima
+      </button>
+    </div>
   </div>
 </template>

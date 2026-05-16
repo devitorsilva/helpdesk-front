@@ -6,13 +6,16 @@ import type { TicketPage, TicketPriority, TicketStatus } from './types/ticket'
 import { ticketPriorityLabels, ticketStatusLabels } from './utils/ticketLabels'
 
 const ticketsPage = ref<TicketPage | null>(null)
+const currentPage = ref(0)
 const selectedStatus = ref<TicketStatus | ''>('')
 const selectedPriority = ref<TicketPriority | ''>('')
 
 async function loadTickets() {
   ticketsPage.value = await getTickets(
     selectedStatus.value,
-    selectedPriority.value
+    selectedPriority.value,
+    currentPage.value,
+    10
   )
 }
 
@@ -21,8 +24,19 @@ onMounted(async () => {
 })
 
 watch([selectedStatus, selectedPriority], async () => {
+  currentPage.value = 0
   await loadTickets()
 })
+
+function handlePreviousPage() {
+  currentPage.value--
+  loadTickets()
+}
+
+function handleNextPage() {
+  currentPage.value++
+  loadTickets()
+}
 </script>
 
 <template>
@@ -88,7 +102,11 @@ watch([selectedStatus, selectedPriority], async () => {
 
       <TicketTable
         v-if="ticketsPage && ticketsPage.content.length > 0"
+        @next-page="handleNextPage"
+        @previous-page="handlePreviousPage"
         :tickets="ticketsPage.content"
+        :current-page="currentPage"
+        :total-pages="ticketsPage.totalPages"
       />
 
       <div
