@@ -3,6 +3,7 @@ import { onMounted, ref, watch } from 'vue'
 import TicketTable from './components/TicketTable.vue'
 import { getTickets } from './services/ticketService'
 import type { TicketPage, TicketPriority, TicketStatus } from './types/ticket'
+import { ticketPriorityLabels, ticketStatusLabels } from './utils/ticketLabels'
 
 const ticketsPage = ref<TicketPage | null>(null)
 const selectedStatus = ref<TicketStatus | ''>('')
@@ -25,31 +26,77 @@ watch([selectedStatus, selectedPriority], async () => {
 </script>
 
 <template>
-  <main>
-    <h1>Helpdesk</h1>
-    <h3>Gestão de Tickets</h3>
+  <main class="min-h-screen bg-gray-100">
+    <div class="mx-auto max-w-6xl px-4 py-8">
+      <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Helpdesk</h1>
+        <p class="text-sm text-gray-600">Gestão de Tickets</p>
+      </div>
 
-    <div class="container">
-      <div class="filters">
-        <div class="status">
-          <select id="status" v-model="selectedStatus">
-            <option value="">Todos os status</option>
-            <option value="OPEN">Aberto</option>
-            <option value="IN_PROGRESS">Em progresso</option>
-            <option value="RESOLVED">Resolvido</option>
-            <option value="CLOSED">Fechado</option>
-          </select>
-        </div>
-        <div class="priority">
-          <select id="priority" v-model="selectedPriority">
-            <option value="">Todas as prioridades</option>
-            <option value="LOW">Baixa</option>
-            <option value="MEDIUM">Média</option>
-            <option value="HIGH">Alta</option>
-          </select>
+      <div class="mb-6 rounded border border-gray-200 bg-white p-4">
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <label
+              for="status"
+              class="mb-1 block text-sm font-medium text-gray-700"
+            >
+              Estado
+            </label>
+            <select
+              id="status"
+              v-model="selectedStatus"
+              class="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+            >
+              <option value="">Todos os estados</option>
+              <option value="OPEN">{{ ticketStatusLabels.OPEN }}</option>
+              <option value="IN_PROGRESS">
+                {{ ticketStatusLabels.IN_PROGRESS }}
+              </option>
+              <option value="RESOLVED">
+                {{ ticketStatusLabels.RESOLVED }}
+              </option>
+              <option value="CLOSED">{{ ticketStatusLabels.CLOSED }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label
+              for="priority"
+              class="mb-1 block text-sm font-medium text-gray-700"
+            >
+              Prioridade
+            </label>
+            <select
+              id="priority"
+              v-model="selectedPriority"
+              class="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+            >
+              <option value="">Todas as prioridades</option>
+              <option value="LOW">{{ ticketPriorityLabels.LOW }}</option>
+              <option value="MEDIUM">{{ ticketPriorityLabels.MEDIUM }}</option>
+              <option value="HIGH">{{ ticketPriorityLabels.HIGH }}</option>
+            </select>
+          </div>
         </div>
       </div>
-      <TicketTable v-if="ticketsPage" :tickets="ticketsPage.content" />
+
+      <div class="mb-4">
+        <p v-if="ticketsPage" class="text-sm text-gray-600">
+          {{ ticketsPage.totalElements }} registro(s) encontrado(s)
+        </p>
+      </div>
+
+      <TicketTable
+        v-if="ticketsPage && ticketsPage.content.length > 0"
+        :tickets="ticketsPage.content"
+      />
+
+      <div
+        v-else
+        class="rounded border border-gray-200 bg-white p-6 text-center text-sm text-gray-500"
+      >
+        Não existem registros para serem exibidos.
+      </div>
     </div>
   </main>
 </template>
