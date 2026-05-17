@@ -2,10 +2,6 @@
 import type { Ticket } from '../types/ticket'
 import { ticketPriorityLabels, ticketStatusLabels } from '../utils/ticketLabels'
 
-async function previousPage() {}
-
-async function nextPage() {}
-
 defineProps<{
   tickets: Ticket[]
   currentPage: number
@@ -15,6 +11,7 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'previous-page'): void
   (e: 'next-page'): void
+  (e: 'edit-ticket', ticket: Ticket): void
 }>()
 </script>
 

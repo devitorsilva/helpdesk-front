@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import axios from 'axios'
 import { onMounted, ref, watch } from 'vue'
 import PrioritySelect from './components/PrioritySelect.vue'
 import StatusSelect from './components/StatusSelect.vue'
 import TicketEditModal from './components/TicketEditModal.vue'
 import TicketTable from './components/TicketTable.vue'
+import ToastMessage from './components/ToastMessage.vue'
 import { getTickets, updateTicket } from './services/ticketService'
 import type {
   Ticket,
@@ -18,14 +20,23 @@ const currentPage = ref(0)
 const selectedStatus = ref<TicketStatus | ''>('')
 const selectedPriority = ref<TicketPriority | ''>('')
 const selectedTicket = ref<Ticket | null>(null)
+const toastMessage = ref('')
+const toastType = ref<'success', 'error'>('success')
+const isLoading = ref(false)
+const isSaving = ref(false)
 
 async function loadTickets() {
-  ticketsPage.value = await getTickets(
-    selectedStatus.value,
-    selectedPriority.value,
-    currentPage.value,
-    10
-  )
+  try {
+    isLoading.value = true
+    ticketsPage.value = await getTickets(
+      selectedStatus.value,
+      selectedPriority.value,
+      currentPage.value,
+      10
+    )
+  } finally {
+    isLoading.value = false
+  }
 }
 
 onMounted(async () => {
@@ -58,9 +69,40 @@ function handleCloseModal() {
 async function handleUpdateTicket(request: UpdateTicketRequest) {
   if (!selectedTicket.value) return
 
-  await updateTicket(selectedTicket.value.id, request)
+  try {
+    isSaving.value = true
+    await updateTicket(selectedTicket.value.id, request)
+    showToast('Tickets atualizado')
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const apiError = error.response?.data
+
+      const message =
+        apiError?.errors?.[0] || apiError?.message || 'Erro ao atualizar ticket'
+
+      showToast(message, 'error')
+      return
+    }
+    showToast('Erro ao atualizar ticket', 'error')
+  } finally {
+    isSaving.value = false
+  }
+
   selectedTicket.value = null
   await loadTickets()
+}
+
+function showToast(message: string, type: 'success' | 'error' = 'success') {
+  toastMessage.value = message
+  toastType.value = type
+
+  setTimeout(() => {
+    closeToast()
+  }, 3000)
+}
+
+function closeToast() {
+  toastMessage.value = ''
 }
 </script>
 
@@ -79,8 +121,15 @@ async function handleUpdateTicket(request: UpdateTicketRequest) {
         </div>
       </div>
 
+      <div
+        v-if="isLoading"
+        class="rounded border border-gray-200 bg-white p-6 text-center text-sm text-gray-500"
+      >
+        Carregando tickets...
+      </div>
+
       <TicketTable
-        v-if="ticketsPage && ticketsPage.content.length > 0"
+        v-else-if="ticketsPage && ticketsPage.content.length > 0"
         @next-page="handleNextPage"
         @previous-page="handlePreviousPage"
         @edit-ticket="handleEditTicket"
@@ -99,8 +148,16 @@ async function handleUpdateTicket(request: UpdateTicketRequest) {
     <TicketEditModal
       v-if="selectedTicket"
       :ticket="selectedTicket"
+      :is-saving="isSaving"
       @close="handleCloseModal"
       @save="handleUpdateTicket"
+    />
+
+    <ToastMessage
+      v-if="toastMessage"
+      :message="toastMessage"
+      :type="toastType"
+      @close="closeToast"
     />
   </main>
 </template>
