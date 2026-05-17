@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { onMounted, ref, watch } from 'vue'
+import ConfirmationDialog from './components/ConfirmationDialog.vue'
 import PrioritySelect from './components/PrioritySelect.vue'
 import StatusSelect from './components/StatusSelect.vue'
 import TicketEditModal from './components/TicketEditModal.vue'
 import TicketTable from './components/TicketTable.vue'
 import ToastMessage from './components/ToastMessage.vue'
-import { getTickets, updateTicket } from './services/ticketService'
+import {
+  deleteTicket,
+  getTickets,
+  updateTicket,
+} from './services/ticketService'
 import type {
   Ticket,
   TicketPage,
@@ -21,9 +26,11 @@ const selectedStatus = ref<TicketStatus | ''>('')
 const selectedPriority = ref<TicketPriority | ''>('')
 const selectedTicket = ref<Ticket | null>(null)
 const toastMessage = ref('')
-const toastType = ref<'success', 'error'>('success')
+const toastType = ref<'success' | 'error'>('success')
 const isLoading = ref(false)
-const isSaving = ref(false)
+const isEditing = ref(false)
+const isDeleting = ref(false)
+const isUpdating = ref(false)
 
 async function loadTickets() {
   try {
@@ -35,7 +42,9 @@ async function loadTickets() {
       10
     )
   } finally {
-    isLoading.value = false
+    setTimeout(() => {
+      isLoading.value = false
+    }, 500)
   }
 }
 
@@ -59,10 +68,14 @@ function handleNextPage() {
 }
 
 function handleEditTicket(ticket: Ticket) {
+  isEditing.value = true
   selectedTicket.value = ticket
 }
 
 function handleCloseModal() {
+  isUpdating.value = false
+  isDeleting.value = false
+  isEditing.value = false
   selectedTicket.value = null
 }
 
@@ -70,7 +83,7 @@ async function handleUpdateTicket(request: UpdateTicketRequest) {
   if (!selectedTicket.value) return
 
   try {
-    isSaving.value = true
+    isUpdating.value = true
     await updateTicket(selectedTicket.value.id, request)
     showToast('Tickets atualizado')
   } catch (error) {
@@ -84,11 +97,9 @@ async function handleUpdateTicket(request: UpdateTicketRequest) {
       return
     }
     showToast('Erro ao atualizar ticket', 'error')
-  } finally {
-    isSaving.value = false
   }
 
-  selectedTicket.value = null
+  handleCloseModal()
   await loadTickets()
 }
 
@@ -103,6 +114,32 @@ function showToast(message: string, type: 'success' | 'error' = 'success') {
 
 function closeToast() {
   toastMessage.value = ''
+}
+
+function handleOpenDeleteTicket(ticket: Ticket) {
+  selectedTicket.value = ticket
+  isDeleting.value = true
+}
+async function handleDeleteTicket(id: number) {
+  if (!id) return
+  try {
+    isUpdating.value = true
+    await deleteTicket(id)
+    showToast('Ticket excluído')
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const apiError = error.response?.data
+      const message =
+        apiError?.errors?.[0] || apiError?.message || 'Erro ao excluir ticket'
+
+      showToast(message, 'error')
+      return
+    }
+    showToast('Erro ao excluir ticket', 'error')
+  } finally {
+    handleCloseModal()
+  }
+  await loadTickets()
 }
 </script>
 
@@ -133,6 +170,7 @@ function closeToast() {
         @next-page="handleNextPage"
         @previous-page="handlePreviousPage"
         @edit-ticket="handleEditTicket"
+        @delete-ticket="handleOpenDeleteTicket"
         :tickets="ticketsPage.content"
         :current-page="currentPage"
         :total-pages="ticketsPage.totalPages"
@@ -146,13 +184,20 @@ function closeToast() {
       </div>
     </div>
     <TicketEditModal
-      v-if="selectedTicket"
+      v-if="isEditing"
       :ticket="selectedTicket"
-      :is-saving="isSaving"
+      :is-updating="isUpdating"
       @close="handleCloseModal"
       @save="handleUpdateTicket"
     />
 
+    <ConfirmationDialog
+      v-if="isDeleting"
+      :ticket="selectedTicket"
+      :is-updating="isUpdating"
+      @close="handleCloseModal"
+      @delete="handleDeleteTicket"
+    />
     <ToastMessage
       v-if="toastMessage"
       :message="toastMessage"

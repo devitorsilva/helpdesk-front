@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Ticket } from '../types/ticket'
 import { ticketPriorityLabels, ticketStatusLabels } from '../utils/ticketLabels'
+import AppBadge from './AppBadge.vue'
 
 defineProps<{
   tickets: Ticket[]
@@ -12,6 +13,7 @@ const emit = defineEmits<{
   (e: 'previous-page'): void
   (e: 'next-page'): void
   (e: 'edit-ticket', ticket: Ticket): void
+  (e: 'delete-ticket', ticket: Ticket): void
 }>()
 </script>
 
@@ -22,9 +24,9 @@ const emit = defineEmits<{
         <tr class="border-b border-gray-200">
           <th class="px-3 py-2">Título</th>
           <th class="px-3 py-2">Estado</th>
-          <th class="px-3 py-2">Prioridade</th>
+          <th class="px-3 py-2 text-center">Prioridade</th>
           <th class="px-3 py-2">Responsável</th>
-          <th class="px-3 py-2">Ações</th>
+          <th class="px-3 py-2 text-center">Ações</th>
         </tr>
       </thead>
 
@@ -43,9 +45,19 @@ const emit = defineEmits<{
             {{ ticketStatusLabels[ticket.status] }}
           </td>
 
-          <td class="px-3 py-2">
+          <td class="px-3 py-2 text-center">
             <span class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
-              {{ ticketPriorityLabels[ticket.priority] }}
+              <AppBadge
+                size="md"
+                :type="
+                  ticket.priority === 'HIGH'
+                    ? 'danger'
+                    : ticket.priority === 'MEDIUM'
+                      ? 'warning'
+                      : 'success'
+                "
+                :text="ticketPriorityLabels[ticket.priority]"
+              />
             </span>
           </td>
 
@@ -53,7 +65,7 @@ const emit = defineEmits<{
             {{ ticket.assignedTo ?? 'Não atribuído' }}
           </td>
 
-          <td class="px-3 py-2">
+          <td class="px-3 py-2 flex justify-center">
             <div class="flex gap-2">
               <button
                 class="cursor-pointer rounded border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-100"
@@ -63,6 +75,7 @@ const emit = defineEmits<{
               </button>
               <button
                 class="cursor-pointer rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"
+                @click="emit('delete-ticket', ticket)"
               >
                 Excluir
               </button>

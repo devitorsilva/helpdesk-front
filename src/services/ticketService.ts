@@ -5,7 +5,7 @@ import type {
   TicketStatus,
   UpdateTicketRequest,
 } from '../types/ticket'
-import { api } from './api.ts'
+import { api } from './api'
 
 export async function getTickets(
   status?: TicketStatus | '',
@@ -29,5 +29,10 @@ export async function updateTicket(
   request: UpdateTicketRequest
 ): Promise<Ticket> {
   const response = await api.patch<Ticket>(`/tickets/${id}`, request)
+  return response.data
+}
+
+export async function deleteTicket(id: number): Promise<void> {
+  const response = await api.delete(`/tickets/${id}`)
   return response.data
 }
