@@ -1,23 +1,24 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { Ticket } from '../types/ticket'
+import type { Ticket, UpdateTicketRequest } from '../types/ticket'
 import PrioritySelect from './PrioritySelect.vue'
 import StatusSelect from './StatusSelect.vue'
 
 const props = defineProps<{
   ticket: Ticket
+  isSaving: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'save'): void
+  (e: 'save', request: UpdateTicketRequest): void
 }>()
 
-const form = ref({
+const form = ref<UpdateTicketRequest>({
   title: '',
   description: '',
-  status: '',
-  priority: '',
+  status: undefined,
+  priority: undefined,
   assignedTo: '',
 })
 
@@ -34,6 +35,10 @@ watch(
   },
   { immediate: true }
 )
+
+function handleSave() {
+  emit('save', form.value)
+}
 </script>
 
 <template>
@@ -103,18 +108,20 @@ watch(
       <div class="mt-6 flex justify-end gap-2">
         <button
           type="button"
-          class="cursor-pointer rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          class="cursor-pointer rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           @click="emit('close')"
+          :disabled="props.isSaving"
         >
           Cancelar
         </button>
 
         <button
           type="button"
-          class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
-          @click="emit('save', form)"
+          class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          :disabled="props.isSaving"
+          @click="handleSave"
         >
-          Salvar
+          {{ props.isSaving ? 'Salvando' : 'Salvar' }}
         </button>
       </div>
     </div>
