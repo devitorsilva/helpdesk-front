@@ -19,7 +19,7 @@ function handleChange(event: Event) {
 <template>
   <div>
     <label for="priority" class="mb-1 block text-sm font-medium text-gray-700">
-      Estado
+      Prioridade
     </label>
     <select
       id="priority"

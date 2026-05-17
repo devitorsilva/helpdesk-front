@@ -6,7 +6,7 @@ import StatusSelect from './StatusSelect.vue'
 
 const props = defineProps<{
   ticket: Ticket
-  isUpdating: boolean
+  isSubmitting: boolean
 }>()
 
 const emit = defineEmits<{
@@ -110,7 +110,7 @@ function handleSave() {
           type="button"
           class="cursor-pointer rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           @click="emit('close')"
-          :disabled="props.isUpdating"
+          :disabled="props.isSubmitting"
         >
           Cancelar
         </button>
@@ -118,10 +118,10 @@ function handleSave() {
         <button
           type="button"
           class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="props.isUpdating"
+          :disabled="props.isSubmitting"
           @click="handleSave"
         >
-          {{ props.isUpdating ? 'Salvando' : 'Salvar' }}
+          {{ props.isSubmitting ? 'Salvando' : 'Salvar' }}
         </button>
       </div>
     </div>

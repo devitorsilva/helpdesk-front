@@ -4,15 +4,18 @@ import { onMounted, ref, watch } from 'vue'
 import ConfirmationDialog from './components/ConfirmationDialog.vue'
 import PrioritySelect from './components/PrioritySelect.vue'
 import StatusSelect from './components/StatusSelect.vue'
+import TicketCreateModal from './components/TicketCreateModal.vue'
 import TicketEditModal from './components/TicketEditModal.vue'
 import TicketTable from './components/TicketTable.vue'
 import ToastMessage from './components/ToastMessage.vue'
 import {
+  createTicket,
   deleteTicket,
   getTickets,
   updateTicket,
 } from './services/ticketService'
 import type {
+  CreateTicketRequest,
   Ticket,
   TicketPage,
   TicketPriority,
@@ -30,7 +33,8 @@ const toastType = ref<'success' | 'error'>('success')
 const isLoading = ref(false)
 const isEditing = ref(false)
 const isDeleting = ref(false)
-const isUpdating = ref(false)
+const isSubmitting = ref(false)
+const isCreating = ref(false)
 
 async function loadTickets() {
   try {
@@ -73,9 +77,10 @@ function handleEditTicket(ticket: Ticket) {
 }
 
 function handleCloseModal() {
-  isUpdating.value = false
+  isSubmitting.value = false
   isDeleting.value = false
   isEditing.value = false
+  isCreating.value = false
   selectedTicket.value = null
 }
 
@@ -83,9 +88,9 @@ async function handleUpdateTicket(request: UpdateTicketRequest) {
   if (!selectedTicket.value) return
 
   try {
-    isUpdating.value = true
+    isSubmitting.value = true
     await updateTicket(selectedTicket.value.id, request)
-    showToast('Tickets atualizado')
+    showToast('Ticket atualizado')
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const apiError = error.response?.data
@@ -94,6 +99,8 @@ async function handleUpdateTicket(request: UpdateTicketRequest) {
         apiError?.errors?.[0] || apiError?.message || 'Erro ao atualizar ticket'
 
       showToast(message, 'error')
+      isSubmitting.value = false
+
       return
     }
     showToast('Erro ao atualizar ticket', 'error')
@@ -106,10 +113,6 @@ async function handleUpdateTicket(request: UpdateTicketRequest) {
 function showToast(message: string, type: 'success' | 'error' = 'success') {
   toastMessage.value = message
   toastType.value = type
-
-  setTimeout(() => {
-    closeToast()
-  }, 3000)
 }
 
 function closeToast() {
@@ -120,10 +123,39 @@ function handleOpenDeleteTicket(ticket: Ticket) {
   selectedTicket.value = ticket
   isDeleting.value = true
 }
+
+function handleOpenCreateModal() {
+  isCreating.value = true
+}
+
+async function handleCreateTicket(request: CreateTicketRequest) {
+  if (!request) return
+
+  try {
+    isSubmitting.value = true
+    await createTicket(request)
+    showToast('Ticket criado')
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const apiError = error.response?.data
+      const message =
+        apiError?.errors?.[0] || apiError?.message || 'Erro ao criar ticket'
+
+      showToast(message, 'error')
+      isSubmitting.value = false
+      return
+    }
+    showToast('Erro ao criar ticket', 'error')
+  }
+
+  handleCloseModal()
+  await loadTickets()
+}
+
 async function handleDeleteTicket(id: number) {
   if (!id) return
   try {
-    isUpdating.value = true
+    isSubmitting.value = true
     await deleteTicket(id)
     showToast('Ticket excluído')
   } catch (error) {
@@ -133,6 +165,8 @@ async function handleDeleteTicket(id: number) {
         apiError?.errors?.[0] || apiError?.message || 'Erro ao excluir ticket'
 
       showToast(message, 'error')
+      isSubmitting.value = false
+
       return
     }
     showToast('Erro ao excluir ticket', 'error')
@@ -152,9 +186,16 @@ async function handleDeleteTicket(id: number) {
       </div>
 
       <div class="mb-6 rounded border border-gray-200 bg-white p-4">
-        <div class="grid gap-4 md:grid-cols-2">
-          <StatusSelect v-model="selectedStatus"></StatusSelect>
-          <PrioritySelect v-model="selectedPriority"></PrioritySelect>
+        <div class="grid gap-4 md:grid-cols-3 md:items-end">
+          <StatusSelect v-model="selectedStatus" />
+          <PrioritySelect v-model="selectedPriority" />
+          <button
+            type="button"
+            class="h-10 cursor-pointer rounded flex-end bg-blue-600 px-4 text-sm text-white hover:bg-blue-700 md:justify-self-end"
+            @click="handleOpenCreateModal"
+          >
+            Criar Ticket
+          </button>
         </div>
       </div>
 
@@ -186,15 +227,21 @@ async function handleDeleteTicket(id: number) {
     <TicketEditModal
       v-if="isEditing"
       :ticket="selectedTicket"
-      :is-updating="isUpdating"
+      :is-submitting="isSubmitting"
       @close="handleCloseModal"
       @save="handleUpdateTicket"
+    />
+    <TicketCreateModal
+      v-if="isCreating"
+      :is-submitting="isSubmitting"
+      @close="handleCloseModal"
+      @save="handleCreateTicket"
     />
 
     <ConfirmationDialog
       v-if="isDeleting"
       :ticket="selectedTicket"
-      :is-updating="isUpdating"
+      :is-submitting="isSubmitting"
       @close="handleCloseModal"
       @delete="handleDeleteTicket"
     />

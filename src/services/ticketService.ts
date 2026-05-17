@@ -1,4 +1,5 @@
 import type {
+  CreateTicketRequest,
   Ticket,
   TicketPage,
   TicketPriority,
@@ -21,6 +22,13 @@ export async function getTickets(
       size: size,
     },
   })
+  return response.data
+}
+
+export async function createTicket(
+  request: CreateTicketRequest
+): Promise<Ticket> {
+  const response = await api.post<Ticket>('/tickets', request)
   return response.data
 }
 

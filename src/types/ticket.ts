@@ -18,7 +18,7 @@ export type Ticket = {
 export type TicketPage = {
   content: Ticket[]
   totalPages: number
-  totalElementes: number
+  totalElements: number
   size: number
   number: number
 }
@@ -29,4 +29,12 @@ export type UpdateTicketRequest = {
   status?: TicketStatus
   priority?: TicketPriority
   assignedTo?: string | null
+}
+export type CreateTicketRequest = {
+  title: string
+  description: string
+  priority: TicketPriority
+  requesterName: string
+  requesterEmail: string
+  assignedTo: string | null
 }
