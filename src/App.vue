@@ -35,6 +35,27 @@ const isEditing = ref(false)
 const isDeleting = ref(false)
 const isSubmitting = ref(false)
 const isCreating = ref(false)
+const selectedSortField = ref<
+  'title' | 'status' | 'priority' | 'assignedTo' | 'createdAt'
+>('createdAt')
+const selectedSortDirection = ref<'asc' | 'desc'>('desc')
+
+function handleSortColumn(
+  field: 'title' | 'statusOrder' | 'priorityOrder' | 'assignedTo'
+) {
+  if (selectedSortField.value !== field) {
+    selectedSortField.value = field
+    selectedSortDirection.value = 'asc'
+  } else if (selectedSortDirection.value === 'asc') {
+    selectedSortDirection.value = 'desc'
+  } else {
+    selectedSortField.value = 'createdAt'
+    selectedSortDirection.value = 'desc'
+  }
+
+  currentPage.value = 0
+  loadTickets()
+}
 
 async function loadTickets() {
   try {
@@ -43,7 +64,8 @@ async function loadTickets() {
       selectedStatus.value,
       selectedPriority.value,
       currentPage.value,
-      10
+      10,
+      `${selectedSortField.value},${selectedSortDirection.value}`
     )
   } finally {
     setTimeout(() => {
@@ -212,6 +234,9 @@ async function handleDeleteTicket(id: number) {
         @previous-page="handlePreviousPage"
         @edit-ticket="handleEditTicket"
         @delete-ticket="handleOpenDeleteTicket"
+        @sort-column="handleSortColumn"
+        :sort-direction="selectedSortDirection"
+        :sort-field="selectedSortField"
         :tickets="ticketsPage.content"
         :current-page="currentPage"
         :total-pages="ticketsPage.totalPages"

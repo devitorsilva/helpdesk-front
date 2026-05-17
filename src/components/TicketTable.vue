@@ -7,6 +7,8 @@ defineProps<{
   tickets: Ticket[]
   currentPage: number
   totalPages: number
+  sortField: 'title' | 'status' | 'priority' | 'assignedTo'
+  sortDirection: 'asc' | 'desc'
 }>()
 
 const emit = defineEmits<{
@@ -14,6 +16,10 @@ const emit = defineEmits<{
   (e: 'next-page'): void
   (e: 'edit-ticket', ticket: Ticket): void
   (e: 'delete-ticket', ticket: Ticket): void
+  (
+    e: 'sort-column',
+    field: 'title' | 'statusOrder' | 'priorityOrder' | 'assignedTo'
+  ): void
 }>()
 </script>
 
@@ -22,10 +28,43 @@ const emit = defineEmits<{
     <table class="table-auto w-full text-left text-sm">
       <thead>
         <tr class="border-b border-gray-200">
-          <th class="px-3 py-2">Título</th>
-          <th class="px-3 py-2">Estado</th>
-          <th class="px-3 py-2 text-center">Prioridade</th>
-          <th class="px-3 py-2">Responsável</th>
+          <th
+            @click="emit('sort-column', 'title')"
+            class="px-3 py-2 cursor-pointer"
+          >
+            Título
+            <span v-if="sortField === 'title'">
+              {{ sortDirection === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+          <th
+            @click="emit('sort-column', 'statusOrder')"
+            class="px-3 py-2 cursor-pointer"
+          >
+            Estado
+            <span v-if="sortField === 'statusOrder'">
+              {{ sortDirection === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+          <th
+            @click="emit('sort-column', 'priorityOrder')"
+            class="px-3 py-2 text-center cursor-pointer"
+          >
+            Prioridade
+            <span v-if="sortField === 'priorityOrder'">
+              {{ sortDirection === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+
+          <th
+            @click="emit('sort-column', 'assignedTo')"
+            class="px-3 py-2 cursor-pointer"
+          >
+            Responsável
+            <span v-if="sortField === 'assignedTo'">
+              {{ sortDirection === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
           <th class="px-3 py-2 text-center">Ações</th>
         </tr>
       </thead>

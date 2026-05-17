@@ -21,6 +21,8 @@ Frontend do projeto de helpdesk construído com Vue 3 e TypeScript, consumindo a
 - Filtro por status
 - Filtro por prioridade
 - Paginação
+- Ordenação por cabeçalho da tabela
+- Criação de ticket em modal
 - Edição de ticket em modal
 - Exclusão com confirmação
 - Toast de sucesso e erro
@@ -49,5 +51,7 @@ O frontend espera a API rodando em:
 - Carregar tickets ao abrir a página
 - Filtrar tickets por status e prioridade
 - Navegar entre páginas
+- Ordenar por colunas da tabela
+- Criar ticket e recarregar a listagem
 - Editar ticket e atualizar a listagem
 - Excluir ticket com confirmação

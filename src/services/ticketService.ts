@@ -12,14 +12,16 @@ export async function getTickets(
   status?: TicketStatus | '',
   priority?: TicketPriority | '',
   page: number = 0,
-  size: number = 10
+  size: number = 10,
+  sort?: string
 ): Promise<TicketPage> {
-  const response = await api.get<TicketPage>('/tickets', {
+  const response = await api.get<TicketPage>(`/tickets`, {
     params: {
       status: status || undefined,
       priority: priority || undefined,
       page: page,
       size: size,
+      sort: sort || undefined,
     },
   })
   return response.data
