@@ -194,6 +194,7 @@ async function handleDeleteTicket(id: number) {
     showToast('Erro ao excluir ticket', 'error')
   } finally {
     handleCloseModal()
+    currentPage.value = 0
   }
   await loadTickets()
 }
